@@ -1,1 +1,6 @@
-<Solution />
+<Solution>
+  <Folder Name="/source/">
+    <Project Path="source/SfDatagrid.WPF.Extensions/SfDatagrid.WPF.Extensions.csproj" />
+    <Project Path="source/TestApp/TestApp.csproj" Id="bab84c7b-c38f-4ed5-bb0b-35300300b333" />
+  </Folder>
+</Solution>
