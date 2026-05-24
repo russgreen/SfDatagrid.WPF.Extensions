@@ -12,6 +12,9 @@ internal partial class ViewModel : ObservableValidator
     [ObservableProperty]
     private ObservableCollection<OrderInfo> _orderInfoCollection;
 
+    [ObservableProperty]
+    private ObservableCollection<object> _selectedOrderInfoCollection = new();
+
     public ViewModel()
     {
         OrderInfoCollection = new ObservableCollection<OrderInfo>( GenerateOrders1());
@@ -37,5 +40,10 @@ internal partial class ViewModel : ObservableValidator
 
 
         return orders;
+    }
+
+    partial void OnSelectedOrderInfoCollectionChanged(ObservableCollection<object> value)
+    {
+
     }
 }
