@@ -21,7 +21,7 @@
                                AutoGenerateColumns="False"                                     
                                ItemsSource="{Binding OrderInfoCollection }">
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId"/>
+                <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId" IsReadOnly="True"/>
                 <syncfusion:GridTextColumn MappingName="CustomerName" HeaderText="CustomerName"/>
                 <syncfusion:GridTextColumn MappingName="Country" HeaderText="Country"/>
                 <syncfusion:GridTextColumn MappingName="ShippingCity" HeaderText="ShippingCity"  />

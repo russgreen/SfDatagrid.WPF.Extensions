@@ -31,7 +31,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Syncfusion.SfGrid.WPF" Version="29.*" />
+	  <PackageReference Include="Syncfusion.SfGrid.WPF" Version="[29.0,34.0)" />
 	</ItemGroup>	
 
 	<!-- Link the solution-root README into the project and mark it to be packed at package root -->

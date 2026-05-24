@@ -72,6 +72,11 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
                 return;
             }
 
+            if (sourceCell.Column.IsReadOnly)
+            {
+                return;  // Skip drag-fill if column is readonly
+            }
+
             if (_columnFilter != null && !_columnFilter(mappingName))
             {
                 return;
@@ -158,7 +163,9 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
 
             var nextNumber = number + increment;
             var nextNumberText = nextNumber.ToString($"D{numberText.Length}", CultureInfo.InvariantCulture);
-            incrementedValue = sourceText[..^numberText.Length] + nextNumberText;
+            var prefixLength = sourceText.Length - numberText.Length;
+            var prefix = prefixLength > 0 ? sourceText.Substring(0, prefixLength) : string.Empty;
+            incrementedValue = prefix + nextNumberText;
             return true;
         }
 
