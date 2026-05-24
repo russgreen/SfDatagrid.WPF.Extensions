@@ -19,12 +19,17 @@ internal partial class OrderInfo : ObservableObject
     [ObservableProperty]
     private string _shippingCity;
 
+
+    [ObservableProperty]
+    private int _quantity;
+
     public OrderInfo(string customerName, string country, string
-        customerId, string shipCity)
+        customerId, string shipCity, int quantity)
     {
         CustomerName = customerName;
         Country = country;
         CustomerId = customerId;
         ShippingCity = shipCity;
+        Quantity = quantity;
     }
 }
