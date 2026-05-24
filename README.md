@@ -1,25 +1,26 @@
 # SfDatagrid.WPF.Extensions
 
-Extension methods and selection controller helpers for Syncfusion WPF `SfDataGrid`.
+Extension methods and behaviors for Syncfusion WPF `SfDataGrid`.
 
 ## Features
 
-### CtrlDragFillSelectionController
+### Ctrl+Drag Fill Behavior
 
-A custom cell selection controller that enables Excel-like drag-fill behavior with modifier keys:
+An attached behavior that enables Excel-like drag-fill functionality with modifier keys:
 
 - **Ctrl+Drag**: Fills selected cells downward in the same column with the source cell's value
 - **Ctrl+Shift+Drag**: Fills downward with auto-incremented values (for numeric trailing digits and supported numeric types)
 - **Column Filter**: Optional predicate to restrict which columns support fill operations
 - **ReadOnly Detection**: Automatically skips fill operations on columns marked with `IsReadOnly=True` or `AllowEditing=False`
+- **Non-Intrusive**: Uses mouse event handlers instead of replacing the SelectionController, preserving normal row selection behavior
 
-Supports numeric auto-increment on trailing digits in strings and numeric data types (`int`, `double`, `decimal`, etc.). The controller respects the grid column's read-only state and prevents modifications to read-only columns.
+Supports numeric auto-increment on trailing digits in strings and numeric data types (`int`, `double`, `decimal`, etc.). The behavior respects the grid column's read-only state and prevents modifications to read-only columns.
 
 ## Project Configuration
 
 The primary package is defined in `source/SfDatagrid.WPF.Extensions/SfDatagrid.WPF.Extensions.csproj`:
 
-- **Target Frameworks**: `net8.0-windows`, `net10.0-windows`
+- **Target Frameworks**: `net48`, `net8.0-windows`, `net9.0-windows`, `net10.0-windows`
 - **Package ID**: `SfDatagrid.WPF.Extensions`
 - **License**: MIT
 - **Symbols**: Included (`.snupkg` format)
@@ -28,59 +29,54 @@ The primary package is defined in `source/SfDatagrid.WPF.Extensions/SfDatagrid.W
 
 The project generates both `.nupkg` (package) and `.snupkg` (symbol) files for debugging and NuGet consumption.
 
-## Qucik Start
+## Quick Start
 
-Add the pacakge reference to your project
+Add the package reference to your project
 
 ```powershell
 # Install packages
 Install-Package SfDatagrid.WPF.Extensions
 ```
 
-```csharp
-	<ItemGroup>
-	  <PackageReference Include="SfDatagrid.WPF.Extensions" Version="*" />
-	</ItemGroup>	
+```xml
+<ItemGroup>
+  <PackageReference Include="SfDatagrid.WPF.Extensions" Version="*" />
+</ItemGroup>	
 ```
 
-Use the controller extension in the code-behind of your WPF window:
+Enable the behavior in the code-behind of your WPF window:
 ```csharp
 using SfDatagrid.WPF.Extensions;
 
-    public MainWindow()
-    {
-        InitializeComponent();
+public MainWindow()
+{
+	InitializeComponent();
 
-        this.ordersGrid.UseCtrlDragFillSelectionController<OrderInfo>();
-    }
+	this.ordersGrid.EnableCtrlDragFill();
+}
 ```
 
-To add to a specific column, use the `columnFilter` parameter:
+To restrict to specific columns, use the `columnFilter` parameter:
 ```csharp
-    public MainWindow()
-    {
-        InitializeComponent();
+public MainWindow()
+{
+	InitializeComponent();
 
-        this.ordersGrid.UseCtrlDragFillSelectionController<OrderInfo>(
-            mappingName => mappingName == nameof(OrderInfo.Quantity));
-    }
+	this.ordersGrid.EnableCtrlDragFill(
+		mappingName => mappingName == nameof(OrderInfo.Quantity));
+}
 ```
 
-To add the extension to a details view grid, add a SfDataGrid_DetailsViewLoading event handler:
+To add the behavior to a details view grid, use a `DetailsViewLoading` event handler:
 ```csharp
-    private void SfDataGrid_DetailsViewLoading(object sender, DetailsViewLoadingAndUnloadingEventArgs e)
-    {
-        if (e.DetailsViewDataGrid is not SfDataGrid detailsGrid)
-        {
-            return;
-        }
+private void SfDataGrid_DetailsViewLoading(object sender, DetailsViewLoadingAndUnloadingEventArgs e)
+{
+	if (e.DetailsViewDataGrid is not SfDataGrid detailsGrid)
+	{
+		return;
+	}
 
-        if (detailsGrid.SelectionController is CtrlDragFillSelectionController<RoomBoundaryModel>)
-        {
-            return;
-        }
-
-        detailsGrid.UseCtrlDragFillSelectionController<RoomBoundaryModel>(
-            mappingName => mappingName == nameof(RoomBoundaryModel.TypeCodeToUse));
-    }
+	detailsGrid.EnableCtrlDragFill(
+		mappingName => mappingName == nameof(RoomBoundaryModel.TypeCodeToUse));
+}
 ```

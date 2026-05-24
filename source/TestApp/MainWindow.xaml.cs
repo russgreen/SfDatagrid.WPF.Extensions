@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        this.ordersGrid.UseCtrlDragFillSelectionController<OrderInfo>();
+        this.ordersGrid.EnableCtrlDragFill();
 
     }
 
