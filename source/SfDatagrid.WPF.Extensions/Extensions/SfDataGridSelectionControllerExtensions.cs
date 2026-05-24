@@ -2,7 +2,7 @@
 using Syncfusion.UI.Xaml.Grid;
 using System;
 
-namespace SfDatagrid.WPF.Extensions.Extensions;
+namespace SfDatagrid.WPF.Extensions;
 
 /// <summary>
 /// Provides extension methods for configuring selection controllers on <see cref="SfDataGrid"/> instances.

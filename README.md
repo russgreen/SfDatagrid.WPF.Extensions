@@ -45,6 +45,8 @@ Install-Package SfDatagrid.WPF.Extensions
 
 Use the controller extension in the code-behind of your WPF window:
 ```csharp
+using SfDatagrid.WPF.Extensions;
+
     public MainWindow()
     {
         InitializeComponent();

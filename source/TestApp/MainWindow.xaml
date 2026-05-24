@@ -18,8 +18,11 @@
                                AllowEditing="True" 
                                SelectionMode="Extended"
                                AutoGenerateColumns="False"                                     
-                               ItemsSource="{Binding OrderInfoCollection }">
+                               ItemsSource="{Binding OrderInfoCollection }"
+                               SelectedItems="{Binding SelectedOrderInfoCollection, Mode=TwoWay}"
+                               CurrentCellValidated="sfDataGridSheets_CurrentCellValidated">
             <syncfusion:SfDataGrid.Columns>
+                <syncfusion:GridCheckBoxSelectorColumn MappingName="SelectorColumn" HeaderText="" AllowCheckBoxOnHeader="True" Width="34" />
                 <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId" AllowEditing="False"/>
                 <syncfusion:GridTextColumn MappingName="CustomerName" HeaderText="CustomerName"/>
                 <syncfusion:GridTextColumn MappingName="Country" HeaderText="Country"/>

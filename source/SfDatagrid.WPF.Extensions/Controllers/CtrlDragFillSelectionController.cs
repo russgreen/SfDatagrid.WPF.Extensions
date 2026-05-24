@@ -1,11 +1,15 @@
-﻿using Syncfusion.Data;
+using Syncfusion.Data;
 using Syncfusion.UI.Xaml.Grid;
 using Syncfusion.UI.Xaml.ScrollAxis;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace SfDatagrid.WPF.Extensions.Controllers;
 
@@ -13,30 +17,30 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
     where TRow : class
 {
     private readonly Func<string, bool>? _columnFilter;
-    private bool _isDragged;
-    private bool _ctrlPressedDuringDrag;
-    private bool _shiftPressedDuringDrag;
+
+    // Position where the mouse was pressed; used to distinguish a real drag from a simple click.
+    private Point? _pressedPosition;
+    private bool _ctrlHeldAtPress;
+    private bool _shiftHeldAtPress;
+
+    private const double DragThreshold = 4.0;
 
     public CtrlDragFillSelectionController(SfDataGrid dataGrid, Func<string, bool>? columnFilter = null)
-        : base(dataGrid) 
+        : base(dataGrid)
     {
         _columnFilter = columnFilter;
     }
 
+    protected override void ProcessPointerPressed(MouseButtonEventArgs args, RowColumnIndex rowColumnIndex)
+    {
+        _pressedPosition = args.GetPosition(DataGrid);
+        _ctrlHeldAtPress = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+        _shiftHeldAtPress = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
+        base.ProcessPointerPressed(args, rowColumnIndex);
+    }
+
     protected override void ProcessDragSelection(MouseEventArgs args, RowColumnIndex rowColumnIndex)
     {
-        _isDragged = true;
-
-        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
-        {
-            _ctrlPressedDuringDrag = true;
-        }
-
-        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
-        {
-            _shiftPressedDuringDrag = true;
-        }
-
         base.ProcessDragSelection(args, rowColumnIndex);
     }
 
@@ -46,8 +50,22 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
 
         try
         {
-            // Must be drag + Ctrl held.
-            if (!_isDragged || !_ctrlPressedDuringDrag || !Keyboard.Modifiers.HasFlag(ModifierKeys.Control))
+            // Require Ctrl to have been held when the drag started.
+            if (!_ctrlHeldAtPress)
+            {
+                return;
+            }
+
+            // Require the mouse to have actually moved enough to be a real drag.
+            if (_pressedPosition is null)
+            {
+                return;
+            }
+
+            var released = args.GetPosition(DataGrid);
+            var dx = released.X - _pressedPosition.Value.X;
+            var dy = released.Y - _pressedPosition.Value.Y;
+            if ((dx * dx + dy * dy) < (DragThreshold * DragThreshold))
             {
                 return;
             }
@@ -74,7 +92,7 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
 
             if (sourceCell.Column.IsReadOnly || !sourceCell.Column.AllowEditing)
             {
-                return;  // Skip drag-fill if column is readonly or not allowed to edit
+                return;
             }
 
             if (_columnFilter != null && !_columnFilter(mappingName))
@@ -96,7 +114,8 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
 
             var sourceValue = property.GetValue(sourceRow);
             var sourceRecordIndex = GetRecordIndex(sourceRow);
-            var incrementOnFill = _shiftPressedDuringDrag;
+            var incrementOnFill = _shiftHeldAtPress;
+            var assignments = new List<(TRow Row, object? Value)>();
 
             // Downward only + same column only.
             foreach (var cell in selectedCells.Where(c => c.Column?.MappingName == mappingName))
@@ -125,14 +144,40 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
                     }
                 }
 
-                property.SetValue(targetRow, valueToSet);
+                assignments.Add((targetRow, valueToSet));
+            }
+
+            // Defer value updates so they do not interfere with Syncfusion's pointer-release
+            // selection state update (including the selector-column checkbox binding).
+            // Use Background priority to ensure all Syncfusion internal updates complete first.
+            if (assignments.Count > 0)
+            {
+                _ = DataGrid.Dispatcher.BeginInvoke(
+                    DispatcherPriority.Background,
+                    new Action(() => ApplyAssignments(property, assignments)));
             }
         }
         finally
         {
-            _isDragged = false;
-            _ctrlPressedDuringDrag = false;
-            _shiftPressedDuringDrag = false;
+            _pressedPosition = null;
+            _ctrlHeldAtPress = false;
+            _shiftHeldAtPress = false;
+        }
+    }
+
+    private static void ApplyAssignments(PropertyInfo property, List<(TRow Row, object? Value)> assignments)
+    {
+        foreach (var (row, value) in assignments)
+        {
+            try
+            {
+                property.SetValue(row, value);
+            }
+            catch
+            {
+                // Suppress exceptions if Syncfusion internal state is still settling.
+                // This prevents crashes from INotifyPropertyChanged timing conflicts.
+            }
         }
     }
 
@@ -194,42 +239,18 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
     {
         switch (value)
         {
-            case byte byteValue:
-                result = byteValue;
-                return true;
-            case sbyte sbyteValue:
-                result = sbyteValue;
-                return true;
-            case short shortValue:
-                result = shortValue;
-                return true;
-            case ushort ushortValue:
-                result = ushortValue;
-                return true;
-            case int intValue:
-                result = intValue;
-                return true;
-            case uint uintValue:
-                result = uintValue;
-                return true;
-            case long longValue:
-                result = longValue;
-                return true;
-            case ulong ulongValue:
-                result = ulongValue;
-                return true;
-            case float floatValue:
-                result = (decimal)floatValue;
-                return true;
-            case double doubleValue:
-                result = (decimal)doubleValue;
-                return true;
-            case decimal decimalValue:
-                result = decimalValue;
-                return true;
-            default:
-                result = default;
-                return false;
+            case byte v:    result = v; return true;
+            case sbyte v:   result = v; return true;
+            case short v:   result = v; return true;
+            case ushort v:  result = v; return true;
+            case int v:     result = v; return true;
+            case uint v:    result = v; return true;
+            case long v:    result = v; return true;
+            case ulong v:   result = v; return true;
+            case float v:   result = (decimal)v; return true;
+            case double v:  result = (decimal)v; return true;
+            case decimal v: result = v; return true;
+            default:        result = default; return false;
         }
     }
 
