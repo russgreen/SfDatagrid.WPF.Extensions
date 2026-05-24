@@ -14,14 +14,13 @@
     </Window.DataContext>
 
     <Grid>
-        <syncfusion:SfDataGrid x:Name="ordersGrid"                                                             
+        <syncfusion:SfDataGrid x:Name="ordersGrid"   
+                               AllowEditing="True" 
                                SelectionMode="Extended"
-                               SelectionUnit="Cell"     
-                               NavigationMode="Cell" 
                                AutoGenerateColumns="False"                                     
                                ItemsSource="{Binding OrderInfoCollection }">
             <syncfusion:SfDataGrid.Columns>
-                <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId" IsReadOnly="True"/>
+                <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId" AllowEditing="False"/>
                 <syncfusion:GridTextColumn MappingName="CustomerName" HeaderText="CustomerName"/>
                 <syncfusion:GridTextColumn MappingName="Country" HeaderText="Country"/>
                 <syncfusion:GridTextColumn MappingName="ShippingCity" HeaderText="ShippingCity"  />

@@ -11,7 +11,7 @@ A custom cell selection controller that enables Excel-like drag-fill behavior wi
 - **Ctrl+Drag**: Fills selected cells downward in the same column with the source cell's value
 - **Ctrl+Shift+Drag**: Fills downward with auto-incremented values (for numeric trailing digits and supported numeric types)
 - **Column Filter**: Optional predicate to restrict which columns support fill operations
-- **ReadOnly Detection**: Automatically skips fill operations on columns marked with `IsReadOnly=True`
+- **ReadOnly Detection**: Automatically skips fill operations on columns marked with `IsReadOnly=True` or `AllowEditing=False`
 
 Supports numeric auto-increment on trailing digits in strings and numeric data types (`int`, `double`, `decimal`, etc.). The controller respects the grid column's read-only state and prevents modifications to read-only columns.
 

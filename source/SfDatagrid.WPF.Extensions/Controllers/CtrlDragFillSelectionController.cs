@@ -72,9 +72,9 @@ public class CtrlDragFillSelectionController<TRow> : GridCellSelectionController
                 return;
             }
 
-            if (sourceCell.Column.IsReadOnly)
+            if (sourceCell.Column.IsReadOnly || !sourceCell.Column.AllowEditing)
             {
-                return;  // Skip drag-fill if column is readonly
+                return;  // Skip drag-fill if column is readonly or not allowed to edit
             }
 
             if (_columnFilter != null && !_columnFilter(mappingName))
