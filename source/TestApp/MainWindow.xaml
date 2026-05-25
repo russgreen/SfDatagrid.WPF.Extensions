@@ -28,6 +28,7 @@
                 <syncfusion:GridTextColumn MappingName="CustomerName" HeaderText="CustomerName"/>
                 <syncfusion:GridTextColumn MappingName="Country" HeaderText="Country"/>
                 <syncfusion:GridTextColumn MappingName="ShippingCity" HeaderText="ShippingCity"  />
+                <syncfusion:GridDateTimeColumn HeaderText="Date" MappingName="OrderDate"  Width="100"  />
                 <syncfusion:GridTextColumn MappingName="Quantity" HeaderText="Quantity"  />
             </syncfusion:SfDataGrid.Columns>
         </syncfusion:SfDataGrid>
