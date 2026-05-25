@@ -20,7 +20,8 @@
                                AutoGenerateColumns="False"                                     
                                ItemsSource="{Binding OrderInfoCollection }"
                                SelectedItems="{Binding SelectedOrderInfoCollection, Mode=TwoWay}"
-                               CurrentCellValidated="sfDataGridSheets_CurrentCellValidated">
+                               GridValidationMode="InView" 
+                               CurrentCellValidated="sfDataGridSheets_CurrentCellValidated" >
             <syncfusion:SfDataGrid.Columns>
                 <syncfusion:GridCheckBoxSelectorColumn MappingName="SelectorColumn" HeaderText="" AllowCheckBoxOnHeader="True" Width="34" />
                 <syncfusion:GridTextColumn MappingName="CustomerId" HeaderText="CustomerId" AllowEditing="False"/>

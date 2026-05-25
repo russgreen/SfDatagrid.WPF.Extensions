@@ -36,5 +36,13 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ordersGrid_MouseUp(object sender, MouseButtonEventArgs e)
+    {
 
+    }
+
+    private void ordersGrid_CurrentCellValueChanged(object sender, CurrentCellValueChangedEventArgs e)
+    {
+
+    }
 }
