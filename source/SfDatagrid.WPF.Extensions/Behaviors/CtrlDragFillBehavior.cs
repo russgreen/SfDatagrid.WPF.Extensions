@@ -278,12 +278,13 @@ public static class CtrlDragFillBehavior
             var sourceValue = property.GetValue(sourceRow);
             Debug.WriteLine($"[CtrlDragFill] Source value: {sourceValue}");
 
-            var assignments = new List<(object Row, object? Value)>();
+            var assignments = new List<(object Row, object? OldValue, object? NewValue)>();
 
             for (int i = 1; i < sortedRows.Count; i++)
             {
                 var targetRow = sortedRows[i].Row;
                 var targetRecordIndex = sortedRows[i].Index;
+                var oldValue = property.GetValue(targetRow);
                 var valueToSet = sourceValue;
 
                 if (incrementOnFill)
@@ -295,14 +296,14 @@ public static class CtrlDragFillBehavior
                     }
                 }
 
-                assignments.Add((targetRow, valueToSet));
+                assignments.Add((targetRow, oldValue, valueToSet));
             }
 
             Debug.WriteLine($"[CtrlDragFill] Assignments to apply: {assignments.Count}");
 
             if (assignments.Count > 0)
             {
-                ApplyAssignments(property, assignments);
+                ApplyAssignments(dataGrid, targetColumn, property, assignments);
                 Debug.WriteLine("[CtrlDragFill] Assignments applied successfully");
             }
         }
@@ -312,13 +313,28 @@ public static class CtrlDragFillBehavior
         }
     }
 
-    private static void ApplyAssignments(PropertyInfo property, List<(object Row, object? Value)> assignments)
+    private static void ApplyAssignments(SfDataGrid dataGrid, GridColumn column, PropertyInfo property, List<(object Row, object? OldValue, object? NewValue)> assignments)
     {
-        foreach (var (row, value) in assignments)
+        var raiseValidated = dataGrid.GetType().GetMethod(
+            "RaiseCurrentCellValidatedEvent",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+        foreach (var (row, oldValue, newValue) in assignments)
         {
             try
             {
-                property.SetValue(row, value);
+                property.SetValue(row, newValue);
+
+                if (raiseValidated != null)
+                        {
+                            var args = new CurrentCellValidatedEventArgs(dataGrid);
+                            var argsType = args.GetType();
+                            argsType.GetProperty("Column")?.SetValue(args, column);
+                            argsType.GetProperty("RowData")?.SetValue(args, row);
+                            argsType.GetProperty("OldValue")?.SetValue(args, oldValue);
+                            argsType.GetProperty("NewValue")?.SetValue(args, newValue);
+                            raiseValidated.Invoke(dataGrid, new object[] { args });
+                        }
             }
             catch
             {

@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace TestApp.Model;
 
-internal partial class OrderInfo : ObservableObject
+internal partial class OrderInfo : ObservableValidator
 {
     [ObservableProperty]
     private string _customerId;
@@ -21,6 +22,8 @@ internal partial class OrderInfo : ObservableObject
 
 
     [ObservableProperty]
+    [Required]
+    [Range(0, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
     private int _quantity;
 
     public OrderInfo(string customerName, string country, string
