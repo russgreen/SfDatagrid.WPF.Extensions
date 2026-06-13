@@ -1,14 +1,14 @@
-using Nuke.Common;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Utilities.Collections;
+using Fallout.Common;
+using Fallout.Common.Git;
+using Fallout.Common.IO;
+using Fallout.Solutions;
+using Fallout.Common.Tools.DotNet;
+using Fallout.Common.Utilities.Collections;
 using System.IO;
 using System.Linq;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
-partial class Build : NukeBuild
+partial class Build : FalloutBuild
 {
 
     readonly AbsolutePath OutputDirectory = RootDirectory / "output";

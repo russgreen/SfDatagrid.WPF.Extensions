@@ -10,7 +10,7 @@ Set-StrictMode -Version 2.0; $ErrorActionPreference = "Stop"; $ConfirmPreference
 $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
 
 $BuildProjectFile = "$PSScriptRoot\build\_build.csproj"
-$TempDirectory = "$PSScriptRoot\.nuke\temp"
+$TempDirectory = "$PSScriptRoot\.fallout\temp"
 
 $DotNetGlobalFile = "$PSScriptRoot\global.json"
 $DotNetInstallUrl = "https://dot.net/v1/dotnet-install.ps1"
