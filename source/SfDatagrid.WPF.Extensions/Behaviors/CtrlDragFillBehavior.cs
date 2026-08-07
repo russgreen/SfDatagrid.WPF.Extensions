@@ -22,27 +22,27 @@ public static class CtrlDragFillBehavior
     private class DragState
     {
         public Point? PressedPosition { get; set; }
-        public bool CtrlHeldAtPress { get; set; }
+        public bool TriggerModifiersHeldAtPress { get; set; }
         public bool ShiftHeldAtPress { get; set; }
         public bool IsDragging { get; set; }
-        public MouseButton? PressedButton { get; set; }
+        public ModifierKeys RequiredModifiersAtPress { get; set; }
     }
 
-    public static readonly DependencyProperty DragButtonProperty =
+    public static readonly DependencyProperty RequiredModifiersProperty =
         DependencyProperty.RegisterAttached(
-            "DragButton",
-            typeof(MouseButton),
+            "RequiredModifiers",
+            typeof(ModifierKeys),
             typeof(CtrlDragFillBehavior),
-            new PropertyMetadata(MouseButton.Left));
+            new PropertyMetadata(ModifierKeys.Control));
 
-    public static MouseButton GetDragButton(DependencyObject obj)
+    public static ModifierKeys GetRequiredModifiers(DependencyObject obj)
     {
-        return (MouseButton)obj.GetValue(DragButtonProperty);
+        return (ModifierKeys)obj.GetValue(RequiredModifiersProperty);
     }
 
-    public static void SetDragButton(DependencyObject obj, MouseButton value)
+    public static void SetRequiredModifiers(DependencyObject obj, ModifierKeys value)
     {
-        obj.SetValue(DragButtonProperty, value);
+        obj.SetValue(RequiredModifiersProperty, value);
     }
 
     private const double DragThreshold = 4.0;
@@ -107,20 +107,16 @@ public static class CtrlDragFillBehavior
     {
         States[dataGrid] = new DragState();
         dataGrid.PreviewMouseLeftButtonDown += OnPreviewMouseLeftButtonDown;
-        dataGrid.PreviewMouseRightButtonDown += OnPreviewMouseRightButtonDown;
         dataGrid.PreviewMouseMove += OnPreviewMouseMove;
         dataGrid.PreviewMouseLeftButtonUp += OnPreviewMouseLeftButtonUp;
-        dataGrid.PreviewMouseRightButtonUp += OnPreviewMouseRightButtonUp;
         dataGrid.Unloaded += OnDataGridUnloaded;
     }
 
     private static void DetachBehavior(SfDataGrid dataGrid)
     {
         dataGrid.PreviewMouseLeftButtonDown -= OnPreviewMouseLeftButtonDown;
-        dataGrid.PreviewMouseRightButtonDown -= OnPreviewMouseRightButtonDown;
         dataGrid.PreviewMouseMove -= OnPreviewMouseMove;
         dataGrid.PreviewMouseLeftButtonUp -= OnPreviewMouseLeftButtonUp;
-        dataGrid.PreviewMouseRightButtonUp -= OnPreviewMouseRightButtonUp;
         dataGrid.Unloaded -= OnDataGridUnloaded;
         States.Remove(dataGrid);
     }
@@ -135,34 +131,30 @@ public static class CtrlDragFillBehavior
 
     private static void OnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        OnPreviewMouseButtonDown(sender, e, MouseButton.Left);
-    }
-
-    private static void OnPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        OnPreviewMouseButtonDown(sender, e, MouseButton.Right);
-    }
-
-    private static void OnPreviewMouseButtonDown(object sender, MouseButtonEventArgs e, MouseButton expectedButton)
-    {
         if (sender is not SfDataGrid dataGrid || !States.TryGetValue(dataGrid, out var state))
         {
             return;
         }
 
-        var configuredButton = GetDragButton(dataGrid);
-        if (configuredButton != expectedButton)
-        {
-            return;
-        }
+        var requiredModifiers = GetRequiredModifiers(dataGrid);
 
         state.PressedPosition = e.GetPosition(dataGrid);
-        state.CtrlHeldAtPress = Keyboard.Modifiers.HasFlag(ModifierKeys.Control);
+        state.RequiredModifiersAtPress = requiredModifiers;
+        state.TriggerModifiersHeldAtPress = HasRequiredModifiers(requiredModifiers);
         state.ShiftHeldAtPress = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
         state.IsDragging = false;
-        state.PressedButton = configuredButton;
 
-        Debug.WriteLine($"[CtrlDragFill] MouseDown: Button={configuredButton}, Ctrl={state.CtrlHeldAtPress}, Shift={state.ShiftHeldAtPress}");
+        Debug.WriteLine($"[CtrlDragFill] MouseDown: RequiredModifiers={requiredModifiers}, Shift={state.ShiftHeldAtPress}");
+    }
+
+    private static bool HasRequiredModifiers(ModifierKeys requiredModifiers)
+    {
+        if (requiredModifiers == ModifierKeys.None)
+        {
+            return true;
+        }
+
+        return (Keyboard.Modifiers & requiredModifiers) == requiredModifiers;
     }
 
     private static void OnPreviewMouseMove(object sender, MouseEventArgs e)
@@ -172,16 +164,12 @@ public static class CtrlDragFillBehavior
             return;
         }
 
-        if (state.PressedPosition is null || !state.CtrlHeldAtPress || state.PressedButton is null)
+        if (state.PressedPosition is null || !state.TriggerModifiersHeldAtPress || !HasRequiredModifiers(state.RequiredModifiersAtPress))
         {
             return;
         }
 
-        var isButtonPressed = state.PressedButton == MouseButton.Left
-            ? e.LeftButton == MouseButtonState.Pressed
-            : e.RightButton == MouseButtonState.Pressed;
-
-        if (!isButtonPressed)
+        if (e.LeftButton != MouseButtonState.Pressed)
         {
             return;
         }
@@ -202,32 +190,17 @@ public static class CtrlDragFillBehavior
 
     private static void OnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        OnPreviewMouseButtonUp(sender, e, MouseButton.Left);
-    }
-
-    private static void OnPreviewMouseRightButtonUp(object sender, MouseButtonEventArgs e)
-    {
-        OnPreviewMouseButtonUp(sender, e, MouseButton.Right);
-    }
-
-    private static void OnPreviewMouseButtonUp(object sender, MouseButtonEventArgs e, MouseButton expectedButton)
-    {
         if (sender is not SfDataGrid dataGrid || !States.TryGetValue(dataGrid, out var state))
-        {
-            return;
-        }
-
-        if (state.PressedButton != expectedButton)
         {
             return;
         }
 
         try
         {
-            Debug.WriteLine($"[CtrlDragFill] MouseUp: Button={expectedButton}, Ctrl={state.CtrlHeldAtPress}, Dragging={state.IsDragging}");
+            Debug.WriteLine($"[CtrlDragFill] MouseUp: RequiredModifiers={state.RequiredModifiersAtPress}, Dragging={state.IsDragging}");
 
-            // Only proceed if Ctrl was held and a real drag occurred
-            if (!state.CtrlHeldAtPress || !state.IsDragging)
+            // Only proceed if the configured modifier keys were held and a real drag occurred
+            if (!state.TriggerModifiersHeldAtPress || !HasRequiredModifiers(state.RequiredModifiersAtPress) || !state.IsDragging)
             {
                 return;
             }
@@ -246,10 +219,10 @@ public static class CtrlDragFillBehavior
         finally
         {
             state.PressedPosition = null;
-            state.CtrlHeldAtPress = false;
+            state.TriggerModifiersHeldAtPress = false;
             state.ShiftHeldAtPress = false;
             state.IsDragging = false;
-            state.PressedButton = null;
+            state.RequiredModifiersAtPress = ModifierKeys.None;
         }
     }
 

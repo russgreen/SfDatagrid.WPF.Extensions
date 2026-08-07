@@ -10,7 +10,7 @@ An attached behavior that enables Excel-like drag-fill functionality with modifi
 
 - **Ctrl+Drag**: Fills selected cells downward in the same column with the source cell's value
 - **Ctrl+Shift+Drag**: Fills downward with auto-incremented values (for numeric trailing digits and supported numeric types)
-- **Configurable Drag Trigger**: Choose either left-click or right-click drag (default: left-click)
+- **Configurable Modifier Key**: Choose the modifier key that activates drag-fill (default: Ctrl)
 - **Column Filter**: Optional predicate to restrict which columns support fill operations
 - **ReadOnly Detection**: Automatically skips fill operations on columns marked with `IsReadOnly=True` or `AllowEditing=False`
 - **Non-Intrusive**: Uses mouse event handlers instead of replacing the SelectionController, preserving normal row selection behavior
@@ -58,7 +58,7 @@ public MainWindow()
 }
 ```
 
-To use right-click drag instead of the default left-click drag:
+To use a different modifier key instead of the default Ctrl, pass the `requiredModifiers` parameter:
 ```csharp
 using SfDatagrid.WPF.Extensions;
 using System.Windows.Input;
@@ -67,7 +67,7 @@ public MainWindow()
 {
 	InitializeComponent();
 
-	this.ordersGrid.EnableCtrlDragFill(dragButton: MouseButton.Right);
+	this.ordersGrid.EnableCtrlDragFill(requiredModifiers: ModifierKeys.Alt);
 }
 ```
 
@@ -82,7 +82,7 @@ public MainWindow()
 }
 ```
 
-You can also configure the trigger button in XAML using the attached property:
+You can also configure the modifier key in XAML using the attached property:
 ```xml
 <Window x:Class="MyApp.MainWindow"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -90,7 +90,7 @@ You can also configure the trigger button in XAML using the attached property:
 		xmlns:behaviors="clr-namespace:SfDatagrid.WPF.Extensions.Behaviors;assembly=SfDatagrid.WPF.Extensions">
 	<sfgrid:SfDataGrid ItemsSource="{Binding Orders}"
 					  behaviors:CtrlDragFillBehavior.IsEnabled="True"
-					  behaviors:CtrlDragFillBehavior.DragButton="Right" />
+					  behaviors:CtrlDragFillBehavior.RequiredModifiers="Alt" />
 </Window>
 ```
 

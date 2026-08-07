@@ -16,13 +16,14 @@ public static class SfDataGridCtrlDragFillExtensions
     /// </summary>
     /// <param name="dataGrid">The SfDataGrid instance.</param>
     /// <param name="columnFilter">An optional filter to determine which columns are affected.</param>
+    /// <param name="requiredModifiers">The modifier keys that must be pressed to activate drag fill.</param>
     public static void EnableCtrlDragFill(
         this SfDataGrid dataGrid,
         Func<string, bool>? columnFilter = null,
-        MouseButton dragButton = MouseButton.Left)
+        ModifierKeys requiredModifiers = ModifierKeys.Control)
     {
         CtrlDragFillBehavior.SetIsEnabled(dataGrid, true);
-        CtrlDragFillBehavior.SetDragButton(dataGrid, dragButton);
+        CtrlDragFillBehavior.SetRequiredModifiers(dataGrid, requiredModifiers);
         if (columnFilter != null)
         {
             CtrlDragFillBehavior.SetColumnFilter(dataGrid, columnFilter);
