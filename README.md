@@ -10,6 +10,7 @@ An attached behavior that enables Excel-like drag-fill functionality with modifi
 
 - **Ctrl+Drag**: Fills selected cells downward in the same column with the source cell's value
 - **Ctrl+Shift+Drag**: Fills downward with auto-incremented values (for numeric trailing digits and supported numeric types)
+- **Configurable Drag Trigger**: Choose either left-click or right-click drag (default: left-click)
 - **Column Filter**: Optional predicate to restrict which columns support fill operations
 - **ReadOnly Detection**: Automatically skips fill operations on columns marked with `IsReadOnly=True` or `AllowEditing=False`
 - **Non-Intrusive**: Uses mouse event handlers instead of replacing the SelectionController, preserving normal row selection behavior
@@ -47,12 +48,26 @@ Install-Package SfDatagrid.WPF.Extensions
 Enable the behavior in the code-behind of your WPF window:
 ```csharp
 using SfDatagrid.WPF.Extensions;
+using System.Windows.Input;
 
 public MainWindow()
 {
 	InitializeComponent();
 
 	this.ordersGrid.EnableCtrlDragFill();
+}
+```
+
+To use right-click drag instead of the default left-click drag:
+```csharp
+using SfDatagrid.WPF.Extensions;
+using System.Windows.Input;
+
+public MainWindow()
+{
+	InitializeComponent();
+
+	this.ordersGrid.EnableCtrlDragFill(dragButton: MouseButton.Right);
 }
 ```
 
@@ -65,6 +80,18 @@ public MainWindow()
 	this.ordersGrid.EnableCtrlDragFill(
 		mappingName => mappingName == nameof(OrderInfo.Quantity));
 }
+```
+
+You can also configure the trigger button in XAML using the attached property:
+```xml
+<Window x:Class="MyApp.MainWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:behaviors="clr-namespace:SfDatagrid.WPF.Extensions.Behaviors;assembly=SfDatagrid.WPF.Extensions">
+	<sfgrid:SfDataGrid ItemsSource="{Binding Orders}"
+					  behaviors:CtrlDragFillBehavior.IsEnabled="True"
+					  behaviors:CtrlDragFillBehavior.DragButton="Right" />
+</Window>
 ```
 
 To add the behavior to a details view grid, use a `DetailsViewLoading` event handler:
