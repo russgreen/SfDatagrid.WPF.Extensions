@@ -1,7 +1,7 @@
-﻿using Nuke.Common;
-using Nuke.Common.Git;
-using Nuke.Common.Tools.DotNet;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using Fallout.Common;
+using Fallout.Common.Git;
+using Fallout.Common.Tools.DotNet;
+using static Fallout.Common.Tools.DotNet.DotNetTasks;
 
 partial class Build
 {

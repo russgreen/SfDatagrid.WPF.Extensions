@@ -1,6 +1,7 @@
 ﻿using SfDatagrid.WPF.Extensions.Behaviors;
 using Syncfusion.UI.Xaml.Grid;
 using System;
+using System.Windows.Input;
 
 namespace SfDatagrid.WPF.Extensions;
 
@@ -17,9 +18,11 @@ public static class SfDataGridCtrlDragFillExtensions
     /// <param name="columnFilter">An optional filter to determine which columns are affected.</param>
     public static void EnableCtrlDragFill(
         this SfDataGrid dataGrid,
-        Func<string, bool>? columnFilter = null)
+        Func<string, bool>? columnFilter = null,
+        MouseButton dragButton = MouseButton.Left)
     {
         CtrlDragFillBehavior.SetIsEnabled(dataGrid, true);
+        CtrlDragFillBehavior.SetDragButton(dataGrid, dragButton);
         if (columnFilter != null)
         {
             CtrlDragFillBehavior.SetColumnFilter(dataGrid, columnFilter);

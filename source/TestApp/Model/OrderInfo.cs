@@ -20,6 +20,9 @@ internal partial class OrderInfo : ObservableValidator
     [ObservableProperty]
     private string _shippingCity;
 
+    [ObservableProperty]
+    private DateTime _orderDate;
+
 
     [ObservableProperty]
     [Required]
@@ -27,12 +30,14 @@ internal partial class OrderInfo : ObservableValidator
     private int _quantity;
 
     public OrderInfo(string customerName, string country, string
-        customerId, string shipCity, int quantity)
+        customerId, string shipCity, int quantity, DateTime orderDate)
     {
         CustomerName = customerName;
         Country = country;
         CustomerId = customerId;
         ShippingCity = shipCity;
+        OrderDate = orderDate;
         Quantity = quantity;
+
     }
 }

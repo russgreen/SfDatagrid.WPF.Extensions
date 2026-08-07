@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        this.ordersGrid.EnableCtrlDragFill();
+        this.ordersGrid.EnableCtrlDragFill(dragButton: MouseButton.Right);
 
     }
 
